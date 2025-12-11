@@ -13,8 +13,8 @@ const App: React.FC = () => {
     const today = new Date();
     const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     return {
-      schoolName: `二年级上册口算练习 (${dateStr})`,
-      gradeInfo: '二 (1)',
+      schoolName: `数学口算练习 (${dateStr})`,
+      gradeInfo: '',
       totalColumns: 5,
       rowsPerColumn: 20,
     };
@@ -116,34 +116,47 @@ const App: React.FC = () => {
     });
   };
 
+  // Helper for rendering buttons
+  const OPS_CONFIG = [
+    { key: 'add', label: '加法', symbol: '+' },
+    { key: 'sub', label: '减法', symbol: '-' },
+    { key: 'mul', label: '乘法', symbol: '×' },
+    { key: 'div', label: '除法', symbol: '÷' },
+  ];
+
   return (
     // Outer container: print:block and print:h-auto remove the screen height constraint
     <div className="min-h-screen bg-gray-200 print:bg-white flex flex-col font-sans print:block print:h-auto print:overflow-visible">
       
       {/* Control Bar - Hidden when printing */}
       <header className="bg-white border-b border-gray-300 px-4 md:px-6 py-4 flex flex-col md:flex-row items-center justify-between sticky top-0 z-10 shadow-sm print:hidden gap-4">
-        <div className="text-center md:text-left flex flex-col gap-2">
+        <div className="text-center md:text-left flex flex-col gap-3 w-full md:w-auto">
           <h1 className="text-xl font-bold text-gray-800 flex items-center justify-center md:justify-start gap-2">
             <span>📚</span> Math Worksheet Generator
           </h1>
-          {/* Operation Options Checkboxes */}
-          <div className="flex gap-4 text-sm text-gray-700 justify-center md:justify-start">
-            <label className="flex items-center gap-1 cursor-pointer hover:text-blue-600">
-              <input type="checkbox" checked={operationOptions.add} onChange={() => toggleOption('add')} className="rounded text-blue-600 focus:ring-blue-500" />
-              <span>加法</span>
-            </label>
-            <label className="flex items-center gap-1 cursor-pointer hover:text-blue-600">
-              <input type="checkbox" checked={operationOptions.sub} onChange={() => toggleOption('sub')} className="rounded text-blue-600 focus:ring-blue-500" />
-              <span>减法</span>
-            </label>
-            <label className="flex items-center gap-1 cursor-pointer hover:text-blue-600">
-              <input type="checkbox" checked={operationOptions.mul} onChange={() => toggleOption('mul')} className="rounded text-blue-600 focus:ring-blue-500" />
-              <span>乘法</span>
-            </label>
-            <label className="flex items-center gap-1 cursor-pointer hover:text-blue-600">
-              <input type="checkbox" checked={operationOptions.div} onChange={() => toggleOption('div')} className="rounded text-blue-600 focus:ring-blue-500" />
-              <span>除法</span>
-            </label>
+          {/* Operation Options - Chip Style Buttons */}
+          <div className="flex flex-wrap justify-center md:justify-start gap-2">
+            {OPS_CONFIG.map((op) => {
+              const isActive = operationOptions[op.key as keyof AllowedOperations];
+              return (
+                <button
+                  key={op.key}
+                  onClick={() => toggleOption(op.key as keyof AllowedOperations)}
+                  className={`
+                    flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all select-none
+                    ${isActive 
+                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
+                      : 'bg-white text-gray-500 border-gray-300 hover:bg-gray-50 hover:border-gray-400'
+                    }
+                  `}
+                >
+                  <span className={`text-lg leading-none ${isActive ? 'opacity-100' : 'opacity-70'}`}>
+                    {op.symbol}
+                  </span>
+                  <span>{op.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -152,7 +165,7 @@ const App: React.FC = () => {
           <div className="w-full md:w-auto">
              <input 
                type="text" 
-               className="border rounded px-3 py-2 text-sm w-full md:w-64"
+               className="border rounded px-3 py-2 text-sm w-full md:w-64 focus:ring-2 focus:ring-blue-500 outline-none"
                value={config.schoolName}
                onChange={(e) => setConfig({...config, schoolName: e.target.value})}
                placeholder="School Name / Title"
@@ -164,7 +177,7 @@ const App: React.FC = () => {
               type="button"
               onClick={handleGenerate}
               disabled={isGenerating || isDownloading}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow-sm transition-colors disabled:opacity-50 cursor-pointer text-sm font-medium flex-1 md:flex-none justify-center whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow-sm transition-colors disabled:opacity-50 cursor-pointer text-sm font-medium flex-1 md:flex-none justify-center whitespace-nowrap active:scale-95 transform"
             >
               <RefreshCw size={16} className={isGenerating ? "animate-spin" : ""} />
               Generate
@@ -174,7 +187,7 @@ const App: React.FC = () => {
               type="button"
               onClick={handleDownloadPDF}
               disabled={isDownloading}
-              className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md shadow-sm transition-colors cursor-pointer disabled:opacity-50 text-sm font-medium flex-1 md:flex-none justify-center whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md shadow-sm transition-colors cursor-pointer disabled:opacity-50 text-sm font-medium flex-1 md:flex-none justify-center whitespace-nowrap active:scale-95 transform"
             >
               {isDownloading ? <RefreshCw size={16} className="animate-spin"/> : <Download size={16} />}
               PDF
@@ -184,7 +197,7 @@ const App: React.FC = () => {
               type="button"
               onClick={handlePrint}
               disabled={isDownloading}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-black text-white rounded-md shadow-sm transition-colors cursor-pointer text-sm font-medium flex-1 md:flex-none justify-center whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-black text-white rounded-md shadow-sm transition-colors cursor-pointer text-sm font-medium flex-1 md:flex-none justify-center whitespace-nowrap active:scale-95 transform"
             >
               <Printer size={16} />
               Print
