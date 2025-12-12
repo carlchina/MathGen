@@ -17,9 +17,9 @@ const Paper: React.FC<PaperProps> = ({ problems, config }) => {
 
   return (
     // w-[210mm] combined with shrink-0 ensures the browser never tries to squash it on mobile.
-    // We reduce padding to p-6 to give columns more breathing room.
-    // Added print:h-[297mm] print:overflow-hidden to prevent extra blank pages in print mode
-    <div id="worksheet-paper" className="bg-white shrink-0 w-[210mm] min-h-[296mm] mx-auto p-6 shadow-lg print:shadow-none print:w-full print:max-w-none print:min-w-0 print:m-0 print:p-6 font-serif text-gray-800 box-border print:h-[297mm] print:overflow-hidden">
+    // print:h-auto and print:min-h-0 let the content dictate height, preventing forced overflow.
+    // print:p-4 reduces padding to save vertical space.
+    <div id="worksheet-paper" className="bg-white shrink-0 w-[210mm] min-h-[296mm] mx-auto p-6 print:p-4 shadow-lg print:shadow-none print:w-full print:max-w-none print:min-w-0 print:m-0 font-serif text-gray-800 box-border print:min-h-0 print:h-auto">
       
       {/* Header */}
       <div className="text-center mb-6">
@@ -47,7 +47,9 @@ const Paper: React.FC<PaperProps> = ({ problems, config }) => {
       {/* Grid */}
       <div className="grid grid-cols-5 gap-2 text-sm md:text-base leading-loose">
         {columns.map((col, colIndex) => (
-          <div key={colIndex} className="flex flex-col gap-3">
+          // print:gap-2 reduces the vertical space between questions in print mode
+          // causing the total height to be significantly less than A4, preventing 2nd page.
+          <div key={colIndex} className="flex flex-col gap-3 print:gap-2">
              <div className="text-center font-bold mb-2">第 {colIndex + 1} 组</div>
              {col.map((problem) => (
                // text-base (16px) ensures 3-step equations fit within the column width (~40mm)
