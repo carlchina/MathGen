@@ -18,7 +18,8 @@ const Paper: React.FC<PaperProps> = ({ problems, config }) => {
   return (
     // w-[210mm] combined with shrink-0 ensures the browser never tries to squash it on mobile.
     // We reduce padding to p-6 to give columns more breathing room.
-    <div id="worksheet-paper" className="bg-white shrink-0 w-[210mm] min-h-[296mm] mx-auto p-6 shadow-lg print:shadow-none print:w-full print:max-w-none print:min-w-0 print:min-h-0 print:m-0 print:p-6 font-serif text-gray-800 box-border">
+    // Added print:h-[297mm] print:overflow-hidden to prevent extra blank pages in print mode
+    <div id="worksheet-paper" className="bg-white shrink-0 w-[210mm] min-h-[296mm] mx-auto p-6 shadow-lg print:shadow-none print:w-full print:max-w-none print:min-w-0 print:m-0 print:p-6 font-serif text-gray-800 box-border print:h-[297mm] print:overflow-hidden">
       
       {/* Header */}
       <div className="text-center mb-6">

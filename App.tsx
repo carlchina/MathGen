@@ -126,7 +126,8 @@ const App: React.FC = () => {
 
   return (
     // Outer container: print:block and print:h-auto remove the screen height constraint
-    <div className="min-h-screen bg-gray-200 print:bg-white flex flex-col font-sans print:block print:h-auto print:overflow-visible">
+    // Added print:min-h-0 to reset min-h-screen in print mode
+    <div className="min-h-screen bg-gray-200 print:bg-white flex flex-col font-sans print:block print:h-auto print:min-h-0 print:overflow-visible">
       
       {/* Control Bar - Hidden when printing */}
       <header className="bg-white border-b border-gray-300 px-4 md:px-6 py-4 flex flex-col md:flex-row items-center justify-between sticky top-0 z-10 shadow-sm print:hidden gap-4">
