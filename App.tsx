@@ -209,14 +209,18 @@ const App: React.FC = () => {
       {/* Main Content Area */}
       {/* print:overflow-visible ensures the browser sees all content, not just the scroll view */}
       {/* overflow-x-auto allows horizontal scrolling on mobile for the fixed-width A4 paper */}
-      <main className="flex-1 p-4 md:p-8 overflow-x-auto print:p-0 print:overflow-visible print:block print:h-auto text-center md:text-left">
+      <main className="flex-1 p-4 md:p-8 overflow-x-auto print:p-0 print:overflow-visible print:block print:h-auto text-center md:text-left bg-gray-200">
         <div className="print:hidden mb-4 text-center text-gray-500 text-sm sticky left-0 right-0">
           在下方预览试卷，如”打印“点击无效，可下载PDF后打印。
         </div>
         
         {/* Paper Container Wrapper */}
-        {/* Use flex justify-center to align paper in the middle without inline-block baseline issues */}
-        <div className="flex justify-center print:block print:w-full print:h-auto">
+        {/* Changed from flex justify-center to w-fit mx-auto. 
+            w-fit ensures the div expands to the full width of the Paper (210mm).
+            mx-auto centers it when the screen is larger.
+            When the screen is smaller, standard block flow keeps it aligned left, allowing horizontal scroll.
+        */}
+        <div className="w-fit mx-auto print:block print:w-full print:h-auto">
            <Paper problems={problems} config={config} />
         </div>
       </main>
