@@ -1,0 +1,21 @@
+/* Custom stylesheet for Math Worksheet Generator */
+
+/* Use standard high-quality printing configuration */
+@media print {
+  body {
+    background: #ffffff;
+    color: #000000;
+  }
+  
+  /* Prevent any page splits within columns */
+  #worksheet-paper {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
+
+/* Base style resets and beautiful UI improvements */
+body {
+  margin: 0;
+  padding: 0;
+}

@@ -4,6 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Math Worksheet Generator</title>
+    <script>
+      // Fix for: Cannot set property fetch of #<Window> which has only a getter
+      // This happens when running inside sandboxed environments like high-security iframes
+      // where Window.prototype.fetch is defined as a non-writable getter property, 
+      // which crashes bundle polyfills attempting to write `window.fetch = window.fetch || ...`
+      (function() {
+        try {
+          var originalFetch = window.fetch;
+          if (originalFetch) {
+            Object.defineProperty(window, 'fetch', {
+              value: function() {
+                return originalFetch.apply(this, arguments);
+              },
+              writable: true,
+              configurable: true
+            });
+          }
+        } catch (e) {
+          console.warn("Could not patch window.fetch:", e);
+        }
+      })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
@@ -42,6 +64,7 @@
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
   <body class="bg-gray-100 text-gray-900">
     <div id="root"></div>
