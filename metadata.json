@@ -1,1 +1,6 @@
-{"name":"Math Worksheet Generator","description":"A printable math worksheet generator for 2nd-grade students featuring addition, subtraction, missing operands, and mixed operations similar to standard school drills.","requestFramePermissions":[],"majorCapabilities":["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]}
+{
+  "name": "Math Worksheet Generator",
+  "description": "A printable math worksheet generator for 2nd-grade students featuring addition, subtraction, missing operands, and mixed operations similar to standard school drills.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
