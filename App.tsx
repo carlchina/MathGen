@@ -30,6 +30,7 @@ const App: React.FC = () => {
   const [conceptSection, setConceptSection] = useState<ConceptSection>(() => generateConceptExercises());
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showNeighbors, setShowNeighbors] = useState(true);
 
   const handleGenerate = useCallback(() => {
     setIsGenerating(true);
@@ -164,6 +165,23 @@ const App: React.FC = () => {
                 </button>
               );
             })}
+            
+            {/* Neighbor option button */}
+            <button
+              onClick={() => setShowNeighbors(prev => !prev)}
+              className={`
+                flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all select-none cursor-pointer
+                ${showNeighbors
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                  : 'bg-gray-50 text-gray-500 border-gray-300 hover:bg-gray-150 hover:border-gray-400'
+                }
+              `}
+            >
+              <span className={`text-[13px] leading-none ${showNeighbors ? 'opacity-100' : 'opacity-70'}`}>
+                🔢
+              </span>
+              <span>相邻数</span>
+            </button>
           </div>
         </div>
 
@@ -245,7 +263,7 @@ const App: React.FC = () => {
 
         {/* Paper Container Wrapper */}
         <div className="w-fit mx-auto print:block print:w-full print:h-auto pb-8 print:pb-0">
-          <Paper problems={problems} config={config} conceptSection={conceptSection} />
+          <Paper problems={problems} config={config} conceptSection={conceptSection} showNeighbors={showNeighbors} />
         </div>
       </main>
 
