@@ -1,21 +1,56 @@
 /* Custom stylesheet for Math Worksheet Generator */
 
-/* Use standard high-quality printing configuration */
-@media print {
-  body {
-    background: #ffffff;
-    color: #000000;
-  }
-  
-  /* Prevent any page splits within columns */
-  #worksheet-paper {
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-}
-
 /* Base style resets and beautiful UI improvements */
 body {
   margin: 0;
   padding: 0;
+}
+
+#worksheet-paper {
+  background-color: #ffffff;
+  box-sizing: border-box;
+}
+
+@media screen {
+  #worksheet-paper {
+    width: 210mm;
+    min-height: 296mm;
+    margin: 0 auto;
+    padding: 2rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  #worksheet-paper {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 14mm 15mm !important;
+    box-shadow: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: 100% !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    overflow: hidden !important;
+  }
+  
+  /* Prevent any page splits within grid columns */
+  #worksheet-paper .grid {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  
+  #worksheet-paper .grid > div {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
 }

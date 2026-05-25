@@ -21,8 +21,8 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection }) => {
     
     if (!text.includes('▢')) {
       return (
-        <div className="flex items-center justify-between w-full h-[26px] print:h-[23px] border-b border-dashed border-gray-100 pb-0.5 z-0">
-          <span className="text-gray-800 font-sans font-semibold text-[14.5px] print:text-[13.5px]">{text}</span>
+        <div className="flex items-center justify-between w-full h-[26px] print:h-[26px] border-b border-dashed border-gray-100 pb-0.5 z-0">
+          <span className="text-gray-800 font-sans font-semibold text-[14.5px] print:text-[14px]">{text}</span>
           {showAnswers && (
             <span className="text-blue-600 font-handwriting font-bold text-[17.5px] print:text-[16px] tracking-wide ml-1 select-none transform -rotate-2">
               {problem.answer}
@@ -51,7 +51,7 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection }) => {
     let boxIndex = 0;
 
     return (
-      <div className="flex items-center w-full h-[26px] print:h-[23px] border-b border-dashed border-gray-100 pb-0.5 text-gray-800 font-sans font-semibold text-[14.5px] print:text-[13.5px]">
+      <div className="flex items-center w-full h-[26px] print:h-[26px] border-b border-dashed border-gray-100 pb-0.5 text-gray-800 font-sans font-semibold text-[14.5px] print:text-[14px]">
         {parts.map((part, index) => {
           const renderBox = index > 0;
           const currentBoxAns = renderBox ? boxAnswers[boxIndex++] : '';
@@ -59,7 +59,7 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection }) => {
           return (
             <React.Fragment key={index}>
               {renderBox && (
-                <span className="inline-flex items-center justify-center w-[28px] print:w-[25px] h-[20px] print:h-[18px] border border-gray-400 bg-gray-50/10 rounded mx-1 shrink-0 relative shadow-inner">
+                <span className="inline-flex items-center justify-center w-[28px] print:w-[26px] h-[20px] print:h-[18px] border border-gray-400 bg-gray-50/10 rounded mx-1 shrink-0 relative shadow-inner">
                   {showAnswers && currentBoxAns ? (
                     <span className="text-rose-600 font-handwriting font-extrabold text-[14.5px] print:text-[13.5px] select-none absolute">
                       {currentBoxAns}
@@ -81,12 +81,12 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection }) => {
     // w-[210mm] combined with shrink-0 ensures the browser never tries to squash it on mobile.
     // print:h-auto and print:min-h-0 let the content dictate height, preventing forced overflow.
     // print:p-4 reduces padding to save vertical space.
-    <div id="worksheet-paper" className="bg-white shrink-0 w-[210mm] min-h-[296mm] mx-auto p-8 print:p-6 shadow-lg print:shadow-none print:w-full print:max-w-none print:min-w-0 print:m-0 font-serif text-gray-800 box-border print:min-h-0 print:h-auto">
+    <div id="worksheet-paper" className="font-serif text-gray-800 box-border">
       
       {/* Header */}
-      <div className="text-center mb-4 print:mb-3">
+      <div className="text-center mb-4 print:mb-4">
         <h1 className="text-2xl font-bold tracking-wider mb-2 font-serif text-gray-905">{config.schoolName}</h1>
-        <div className="flex justify-between items-center text-sm border-b-2 border-gray-900 pb-2 mt-4 print:mt-3 font-serif text-gray-750">
+        <div className="flex justify-between items-center text-sm border-b-2 border-gray-900 pb-2 mt-4 print:mt-3 print:pb-2 font-serif text-gray-750">
           <div>
             班级（ <span className="font-sans font-bold text-gray-900 px-1">二（{config.gradeInfo || '   '}）</span>班 ）
           </div>
@@ -103,19 +103,20 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection }) => {
       </div>
 
       {/* Grid containing Columns of Math equations */}
-      <div className="grid grid-cols-5 gap-3.5 text-sm leading-loose border-b-2 border-gray-900 pb-3">
+      <div className="grid grid-cols-5 gap-3.5 print:gap-x-3.5 print:gap-y-0 text-sm leading-loose border-b-2 border-gray-900 pb-3 print:pb-3">
         {columns.map((col, colIndex) => {
-          const chineseNumbers = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-          const groupTitle = `第 ${chineseNumbers[colIndex] || (colIndex + 1)} 组`;
+          const chineseNumbers = ['--','一', '二', '三', '四', '五', '六', '七', '八', '九', '十']; // helper fallback fix offset
+          const actualIndex = colIndex + 1;
+          const groupTitle = `第 ${chineseNumbers[actualIndex] || actualIndex} 组`;
           return (
-            // print:gap-1 reduces the vertical space between questions in print mode
-            // causing the total height to be significantly less than A4, preventing 2nd page.
-            <div key={colIndex} className="flex flex-col gap-1.5 print:gap-1">
+            // print:gap-y-[2.5px] optimizes the vertical space between questions in print mode
+            // causing the total height to fill the A4 page beautifully.
+            <div key={colIndex} className="flex flex-col gap-1.5 print:gap-y-[2.5px]">
               <div className="text-center font-bold mb-1 text-gray-800 border-b border-gray-300 pb-1 font-sans text-xs tracking-wide">
                 {groupTitle}
               </div>
               {col.map((problem) => (
-                <div key={problem.id} className="whitespace-nowrap h-[26px] print:h-[23px] flex items-center">
+                <div key={problem.id} className="whitespace-nowrap h-[26px] print:h-[26px] flex items-center">
                   {renderMathEquation(problem, !!config.showAnswers)}
                 </div>
               ))}
@@ -125,8 +126,8 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection }) => {
       </div>
 
       {/* Concept & Application Section at the bottom */}
-      <div className="mt-5 print:mt-4 font-sans text-[13px] print:text-[12px] leading-relaxed text-left">
-        <div className="space-y-2.5 print:space-y-1.5 pl-0.5 text-gray-800">
+      <div className="mt-5 print:mt-6 font-sans text-[13px] print:text-[12px] leading-relaxed text-left">
+        <div className="space-y-2.5 print:space-y-[8px] pl-0.5 text-gray-850">
           {/* Neighbors */}
           <div className="flex flex-wrap items-center gap-y-1.5">
             <span className="font-bold text-gray-800 mr-2 min-w-[85px] block sm:inline">相邻的数：</span>
@@ -219,10 +220,7 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection }) => {
         </div>
       </div>
 
-      {/* Footer Notes (Hidden when printing to maximize space) */}
-      <div className="mt-8 pt-4 border-t border-gray-200 text-center text-[11px] text-gray-400 print:hidden select-none font-sans">
-        * 汇师小学二年级下册口算精编版 • 自适应A4多功能完美排版
-      </div>
+
     </div>
   );
 };
