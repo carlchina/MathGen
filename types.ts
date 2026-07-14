@@ -35,4 +35,5 @@ export interface WorksheetConfig {
   totalColumns: number;
   rowsPerColumn: number;
   showAnswers?: boolean; // Toggle to display answer sheet
+  difficulty?: 'easy' | 'medium' | 'hard';
 }
