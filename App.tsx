@@ -11,8 +11,8 @@ const App: React.FC = () => {
   // Initialize config with dynamic date and default values matching image
   const [config, setConfig] = useState<WorksheetConfig>(() => {
     return {
-      schoolName: '汇师小学二年级下册口算练习',
-      gradeInfo: '11', // default class 11 from the image
+      schoolName: '口算练习',
+      gradeInfo: '', // default class is now empty
       totalColumns: 5,
       rowsPerColumn: 22, // update default to match the 22 rows in the image
       showAnswers: false,
@@ -184,7 +184,7 @@ const App: React.FC = () => {
                className="border border-gray-350 rounded px-2 py-1.5 text-sm w-24 focus:ring-2 focus:ring-blue-500 outline-none text-center font-bold"
                value={config.gradeInfo}
                onChange={(e) => setConfig({...config, gradeInfo: e.target.value})}
-               placeholder="班级 (e.g. 11)"
+               placeholder="班级"
              />
              <select
                className="border border-gray-350 rounded px-2.5 py-1.5 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none font-semibold text-gray-700 cursor-pointer w-full sm:w-auto"

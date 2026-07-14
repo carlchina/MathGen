@@ -88,7 +88,7 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection }) => {
         <h1 className="text-2xl font-bold tracking-wider mb-2 font-serif text-gray-905">{config.schoolName}</h1>
         <div className="flex justify-between items-center text-sm border-b-2 border-gray-900 pb-2 mt-4 print:mt-3 font-serif text-gray-750">
           <div>
-            班级（ <span className="font-sans font-bold text-gray-900 px-1">二（{config.gradeInfo || '   '}）</span>班 ）
+            班级（ <span className="font-sans font-bold text-gray-900 px-2">{config.gradeInfo || '          '}</span> ）
           </div>
           <div>
             姓名（ <span className="inline-block w-24"></span> ）
@@ -221,7 +221,7 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection }) => {
 
       {/* Footer Notes (Hidden when printing to maximize space) */}
       <div className="mt-8 pt-4 border-t border-gray-200 text-center text-[11px] text-gray-400 print:hidden select-none font-sans">
-        * 小学二年级下册口算精编版 • 自适应A4多功能完美排版
+        * 口算精编版 • 自适应A4多功能完美排版
       </div>
     </div>
   );
