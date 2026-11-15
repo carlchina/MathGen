@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { MathProblem, WorksheetConfig, ConceptSection } from '../types';
 
 interface PaperProps {
@@ -10,6 +10,16 @@ interface PaperProps {
 
 const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection, showNeighbors = true }) => {
   const isGrade3 = config.gradeLevel === 'grade3' || config.rowsPerColumn >= 25;
+  
+  // Detect iOS environment (iPhone, iPad, iPod) where AirPrint uses stricter/larger margins
+  const isIOS = useMemo(() => {
+    if (typeof window === 'undefined' || typeof navigator === 'undefined') return false;
+    return (
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    );
+  }, []);
+
   // Split problems into columns
   const problemsPerCol = config.rowsPerColumn;
   const columns: MathProblem[][] = [];
@@ -23,10 +33,10 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection, showNei
     
     if (!text.includes('▢')) {
       const fontCls = isGrade3
-        ? 'text-[14.5px] print:text-[14px]'
+        ? (isIOS ? 'text-[14px] print:text-[14px]' : 'text-[15px] print:text-[14.5px]')
         : (showNeighbors ? 'text-[14.5px] print:text-[14px]' : 'text-[15px] print:text-[15px]');
       const ansFontCls = isGrade3
-        ? 'text-[16.5px] print:text-[16px]'
+        ? (isIOS ? 'text-[16px] print:text-[15.5px]' : 'text-[17px] print:text-[16.5px]')
         : (showNeighbors ? 'text-[17.5px] print:text-[16px]' : 'text-[17.5px] print:text-[18px]');
 
       return (
@@ -59,7 +69,7 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection, showNei
 
     let boxIndex = 0;
     const fontCls = isGrade3
-      ? 'text-[14.5px] print:text-[14px]'
+      ? (isIOS ? 'text-[14px] print:text-[14px]' : 'text-[15px] print:text-[14.5px]')
       : (showNeighbors ? 'text-[14.5px] print:text-[14px]' : 'text-[15px] print:text-[15px]');
 
     return (
@@ -96,9 +106,9 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection, showNei
     <div id="worksheet-paper" className="font-serif text-gray-800 box-border">
       
       {/* Header */}
-      <div className="text-center mb-3 print:mb-2">
+      <div className={`text-center ${isIOS ? 'mb-2.5 print:mb-2' : 'mb-3.5 print:mb-3'}`}>
         <h1 className="text-2xl font-bold tracking-wider mb-2 font-serif text-gray-905">{config.schoolName}</h1>
-        <div className="flex justify-between items-center text-sm border-b-2 border-gray-900 pb-2 mt-3 print:mt-2 print:pb-1 font-serif text-gray-750">
+        <div className={`flex justify-between items-center text-sm border-b-2 border-gray-900 font-serif text-gray-750 ${isIOS ? 'pb-1.5 mt-2.5 print:mt-2 print:pb-1' : 'pb-2 mt-3.5 print:mt-3 print:pb-1.5'}`}>
           <div>
             班级（ <span className="font-sans font-bold text-gray-900 px-1">{isGrade3 ? '三' : '二'}（{config.gradeInfo || '   '}）</span>班 ）
           </div>
@@ -120,16 +130,19 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection, showNei
           const chineseNumbers = ['--','一', '二', '三', '四', '五', '六', '七', '八', '九', '十']; // helper fallback fix offset
           const actualIndex = colIndex + 1;
           const groupTitle = isGrade3 ? `第 ${actualIndex} 组` : `第 ${chineseNumbers[actualIndex] || actualIndex} 组`;
+          
+          // Adaptive row gaps and item heights: iOS AirPrint uses compact height to avoid breaking to page 2,
+          // while Desktop Chrome & Safari expand gracefully to fill the A4 page without large empty bottoms.
           const colGapCls = isGrade3
-            ? 'gap-1 print:gap-y-[2px]'
-            : (showNeighbors ? 'gap-1 print:gap-y-[2.2px]' : 'gap-1.5 print:gap-y-[4px]');
+            ? (isIOS ? 'gap-1 print:gap-y-[1.8px]' : 'gap-1.5 print:gap-y-[3px]')
+            : (showNeighbors ? (isIOS ? 'gap-1 print:gap-y-[2px]' : 'gap-1.5 print:gap-y-[2.8px]') : (isIOS ? 'gap-1.5 print:gap-y-[3px]' : 'gap-2 print:gap-y-[4.5px]'));
           const itemHeightCls = isGrade3
-            ? 'h-[26px] print:h-[26px]'
-            : (showNeighbors ? 'h-[26px] print:h-[26px]' : 'h-[29px] print:h-[29px]');
+            ? (isIOS ? 'h-[26px] print:h-[26px]' : 'h-[28px] print:h-[28px]')
+            : (showNeighbors ? (isIOS ? 'h-[26px] print:h-[26px]' : 'h-[27.5px] print:h-[27.5px]') : (isIOS ? 'h-[28px] print:h-[28px]' : 'h-[30.5px] print:h-[30.5px]'));
 
           return (
             <div key={colIndex} className={`flex flex-col ${colGapCls}`}>
-              <div className="text-center font-bold mb-1 print:mb-1 text-gray-800 border-b border-gray-300 pb-0.5 print:pb-0.5 font-sans text-xs tracking-wide">
+              <div className={`text-center font-bold text-gray-800 border-b border-gray-300 font-sans text-xs tracking-wide ${isIOS ? 'mb-1 print:mb-0.5 pb-0.5 print:pb-0.5' : 'mb-1 print:mb-1.5 pb-0.5 print:pb-1'}`}>
                 {groupTitle}
               </div>
               {col.map((problem) => (
@@ -138,7 +151,7 @@ const Paper: React.FC<PaperProps> = ({ problems, config, conceptSection, showNei
                 </div>
               ))}
               {(config.showMistakeCount ?? isGrade3) && (
-                <div className="text-center font-serif text-xs text-gray-700 mt-1 pt-1 border-t border-gray-300 print:text-[11.5px] print:mt-1 print:pt-0.5 tracking-wider select-none">
+                <div className={`text-center font-serif text-xs text-gray-700 border-t border-gray-300 tracking-wider select-none ${isIOS ? 'mt-1 pt-1 print:mt-1 print:pt-0.5 print:text-[11px]' : 'mt-1.5 pt-1.5 print:mt-1.5 print:pt-1 print:text-[12px]'}`}>
                   错（ &nbsp;&nbsp;&nbsp;&nbsp; ）题
                 </div>
               )}
