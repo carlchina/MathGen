@@ -1,4 +1,4 @@
-import { MathProblem, OperationType, ConceptSection, ConceptProblem } from '../types';
+import { MathProblem, OperationType, ConceptSection, ConceptProblem, GradeLevel } from '../types';
 
 // Helper to get random int between min and max (inclusive)
 const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -360,146 +360,403 @@ const generateMissingValueRemainder = (col: number): MathProblem => {
 };
 
 /**
+ * Grade 3: Two-digit by one-digit multiplication
+ * e.g., 23 × 4 =, 7 × 15 =, 20 × 7 =
+ */
+const generateGrade3Multiplication = (): MathProblem => {
+  const s = randomInt(2, 9);
+  const d = randomInt(11, 45);
+  const flip = Math.random() < 0.35;
+  const a = flip ? s : d;
+  const b = flip ? d : s;
+  return {
+    id: generateId(),
+    display: `${a} × ${b} =`,
+    answer: (a * b).toString(),
+    type: OperationType.MULTIPLICATION
+  };
+};
+
+/**
+ * Grade 3: Two-digit divided by one-digit (with remainder or exact)
+ * e.g., 85 ÷ 6 =, 73 ÷ 8 =, 96 ÷ 8 =
+ */
+const generateGrade3Division = (): MathProblem => {
+  const b = randomInt(5, 9);
+  const a = randomInt(42, 98);
+  const q = Math.floor(a / b);
+  const r = a % b;
+  return {
+    id: generateId(),
+    display: `${a} ÷ ${b} =`,
+    answer: r === 0 ? q.toString() : `${q} …… ${r}`,
+    type: r === 0 ? OperationType.DIVISION : OperationType.REMAINDER_DIVISION
+  };
+};
+
+/**
+ * Grade 3 Row 17: a + b × c =
+ * e.g., 25 + 8 × 6 = 73
+ */
+const generateGrade3MixedAddMul = (): MathProblem => {
+  const b = randomInt(4, 9);
+  const c = randomInt(4, 9);
+  const a = randomInt(20, 55);
+  return {
+    id: generateId(),
+    display: `${a} + ${b} × ${c} =`,
+    answer: (a + b * c).toString(),
+    type: OperationType.MIXED_OP
+  };
+};
+
+/**
+ * Grade 3 Row 18: (a + b) ÷ c =
+ * e.g., (36 + 24) ÷ 6 = 10
+ */
+const generateGrade3MixedAddDiv = (): MathProblem => {
+  const c = randomInt(5, 8);
+  const k = randomInt(6, 12);
+  const sum = c * k;
+  const a = randomInt(12, sum - 12);
+  const b = sum - a;
+  return {
+    id: generateId(),
+    display: `(${a} + ${b}) ÷ ${c} =`,
+    answer: k.toString(),
+    type: OperationType.MIXED_OP
+  };
+};
+
+/**
+ * Grade 3 Row 19: a - b × c =
+ * e.g., 72 - 9 × 5 = 27
+ */
+const generateGrade3MixedSubMul = (): MathProblem => {
+  const b = randomInt(5, 9);
+  const c = randomInt(5, 9);
+  const prod = b * c;
+  const diff = randomInt(5, 30);
+  const a = Math.min(prod + diff, 99);
+  return {
+    id: generateId(),
+    display: `${a} - ${b} × ${c} =`,
+    answer: (a - prod).toString(),
+    type: OperationType.MIXED_OP
+  };
+};
+
+/**
+ * Grade 3 Row 20: a × (b - c) =
+ * e.g., 7 × (18 - 9) = 63
+ */
+const generateGrade3MixedMulSub = (): MathProblem => {
+  const a = randomInt(5, 9);
+  const diff = randomInt(6, 9);
+  const c = randomInt(6, 9);
+  const b = c + diff;
+  return {
+    id: generateId(),
+    display: `${a} × (${b} - ${c}) =`,
+    answer: (a * diff).toString(),
+    type: OperationType.MIXED_OP
+  };
+};
+
+/**
+ * Grade 3 Row 21: a ÷ (b + c) =
+ * e.g., 48 ÷ (4 + 2) = 8
+ */
+const generateGrade3MixedDivAdd = (): MathProblem => {
+  const sum = randomInt(6, 9);
+  const b = randomInt(2, sum - 2);
+  const c = sum - b;
+  const k = randomInt(4, 9);
+  const a = sum * k;
+  return {
+    id: generateId(),
+    display: `${a} ÷ (${b} + ${c}) =`,
+    answer: k.toString(),
+    type: OperationType.MIXED_OP
+  };
+};
+
+/**
+ * Grade 3 Row 22: a + b - c =
+ * e.g., 46 + 38 - 26 = 58
+ */
+const generateGrade3Mixed3AddSub = (): MathProblem => {
+  const a = randomInt(35, 65);
+  const b = randomInt(20, 95 - a);
+  let c: number;
+  if (Math.random() < 0.6) {
+    const unit = b % 10;
+    const maxTens = Math.floor((a + b - 15) / 10);
+    const cTens = maxTens >= 1 ? randomInt(1, maxTens) : 1;
+    c = cTens * 10 + unit;
+    if (c >= a + b || c < 10) {
+      c = randomInt(15, Math.max(16, a + b - 15));
+    }
+  } else {
+    c = randomInt(15, Math.max(16, a + b - 15));
+  }
+  return {
+    id: generateId(),
+    display: `${a} + ${b} - ${c} =`,
+    answer: (a + b - c).toString(),
+    type: OperationType.MIXED_3_NUM
+  };
+};
+
+/**
+ * Grade 3 Row 23: a - b - c =
+ * e.g., 87 - 29 - 17 =, 100 - 46 - 24 =
+ */
+const generateGrade3Mixed3Sub = (): MathProblem => {
+  if (Math.random() < 0.6) {
+    const sumSub = randomInt(5, 8) * 10;
+    const b = randomInt(15, sumSub - 15);
+    const c = sumSub - b;
+    const a = Math.random() < 0.4 ? 100 : randomInt(sumSub + 10, 99);
+    return {
+      id: generateId(),
+      display: `${a} - ${b} - ${c} =`,
+      answer: (a - b - c).toString(),
+      type: OperationType.MIXED_3_NUM
+    };
+  } else {
+    const a = randomInt(80, 100);
+    const b = randomInt(18, 45);
+    const c = randomInt(15, Math.max(16, a - b - 10));
+    return {
+      id: generateId(),
+      display: `${a} - ${b} - ${c} =`,
+      answer: (a - b - c).toString(),
+      type: OperationType.MIXED_3_NUM
+    };
+  }
+};
+
+/**
+ * Grade 3 Row 24: (a - b) × c =
+ * e.g., (31 - 15) × 4 = 64
+ */
+const generateGrade3MixedSubMulParen = (): MathProblem => {
+  const c = randomInt(2, 4);
+  const diff = randomInt(14, Math.floor(95 / c));
+  const b = randomInt(14, 35);
+  const a = b + diff;
+  return {
+    id: generateId(),
+    display: `(${a} - ${b}) × ${c} =`,
+    answer: (diff * c).toString(),
+    type: OperationType.MIXED_OP
+  };
+};
+
+/**
+ * Grade 3 Row 25: a ÷ (b - c) =
+ * e.g., 63 ÷ (12 - 5) = 9
+ */
+const generateGrade3MixedDivSub = (): MathProblem => {
+  const diff = randomInt(6, 9);
+  const c = randomInt(4, 9);
+  const b = c + diff;
+  const k = randomInt(4, 9);
+  const a = diff * k;
+  return {
+    id: generateId(),
+    display: `${a} ÷ (${b} - ${c}) =`,
+    answer: k.toString(),
+    type: OperationType.MIXED_OP
+  };
+};
+
+/**
  * Generate fully customized or structured worksheets
  */
-export const generateWorksheet = (totalCount: number, ops: AllowedOperations): MathProblem[] => {
+export const generateWorksheet = (
+  totalCount: number,
+  ops: AllowedOperations,
+  gradeLevel: GradeLevel = 'grade2',
+  customRowsPerColumn?: number
+): MathProblem[] => {
   const problems: MathProblem[] = [];
-  const rowsPerColumn = 22; // Hardcode to 22 for the Huisi Primary standard
+  const rowsPerColumn = customRowsPerColumn || (gradeLevel === 'grade3' ? 25 : 22);
   const numColumns = Math.ceil(totalCount / rowsPerColumn);
 
   for (let c = 0; c < numColumns; c++) {
     for (let r = 0; r < rowsPerColumn; r++) {
-      const rowNum = r + 1; // 1 to 22
       let probDetail: MathProblem;
 
-      if (rowNum === 1 || rowNum === 3 || rowNum === 5) {
-        // Carry Addition
-        if (ops.add) {
-          probDetail = generateAdditionCarry();
-        } else if (ops.sub) {
-          probDetail = generateSubtractionBorrow();
+      if (gradeLevel === 'grade3') {
+        const rowNum = (r % 25) + 1; // 1 to 25
+        if (rowNum >= 1 && rowNum <= 11) {
+          // Rows 1-11: Two-digit by one-digit multiplication
+          probDetail = ops.mul ? generateGrade3Multiplication() : generateBasicMix(ops);
+        } else if (rowNum >= 12 && rowNum <= 16) {
+          // Rows 12-16: Two-digit divided by one-digit
+          probDetail = ops.div ? generateGrade3Division() : generateBasicMix(ops);
+        } else if (rowNum === 17) {
+          // Row 17: a + b × c
+          probDetail = (ops.add && ops.mul) ? generateGrade3MixedAddMul() : generateBasicMix(ops);
+        } else if (rowNum === 18) {
+          // Row 18: (a + b) ÷ c
+          probDetail = (ops.add && ops.div) ? generateGrade3MixedAddDiv() : generateBasicMix(ops);
+        } else if (rowNum === 19) {
+          // Row 19: a - b × c
+          probDetail = (ops.sub && ops.mul) ? generateGrade3MixedSubMul() : generateBasicMix(ops);
+        } else if (rowNum === 20) {
+          // Row 20: a × (b - c)
+          probDetail = (ops.mul && ops.sub) ? generateGrade3MixedMulSub() : generateBasicMix(ops);
+        } else if (rowNum === 21) {
+          // Row 21: a ÷ (b + c)
+          probDetail = (ops.div && ops.add) ? generateGrade3MixedDivAdd() : generateBasicMix(ops);
+        } else if (rowNum === 22) {
+          // Row 22: a + b - c
+          probDetail = (ops.add && ops.sub) ? generateGrade3Mixed3AddSub() : generateBasicMix(ops);
+        } else if (rowNum === 23) {
+          // Row 23: a - b - c
+          probDetail = ops.sub ? generateGrade3Mixed3Sub() : generateBasicMix(ops);
+        } else if (rowNum === 24) {
+          // Row 24: (a - b) × c
+          probDetail = (ops.sub && ops.mul) ? generateGrade3MixedSubMulParen() : generateBasicMix(ops);
         } else {
-          probDetail = generateBasicMix(ops);
+          // Row 25: a ÷ (b - c)
+          probDetail = (ops.div && ops.sub) ? generateGrade3MixedDivSub() : generateBasicMix(ops);
         }
-      } else if (rowNum === 2 || rowNum === 4) {
-        // Borrow Subtraction
-        if (ops.sub) {
-          probDetail = generateSubtractionBorrow();
-        } else if (ops.add) {
-          probDetail = generateAdditionCarry();
-        } else {
-          probDetail = generateBasicMix(ops);
-        }
-      } else if (rowNum === 6 || rowNum === 7 || rowNum === 8) {
-        // Elementary Multiplication
-        if (ops.mul) {
-          probDetail = generateMultiplication();
-        } else {
-          probDetail = generateBasicMix(ops);
-        }
-      } else if (rowNum === 9 || rowNum === 10) {
-        // Exact Division
-        if (ops.div) {
-          probDetail = generateDivision();
-        } else {
-          probDetail = generateBasicMix(ops);
-        }
-      } else if (rowNum >= 11 && rowNum <= 14) {
-        // Division with Remainder
-        if (ops.div) {
-          probDetail = generateDivisionRemainder();
-        } else {
-          probDetail = generateBasicMix(ops);
-        }
-      } else if (rowNum === 15) {
-        // 3-Num Addition
-        if (ops.add) {
-          probDetail = generateFriendlyAddition();
-        } else {
-          probDetail = generateBasicMix(ops);
-        }
-      } else if (rowNum === 16) {
-        // 3-Num Subtraction
-        if (ops.sub) {
-          probDetail = generateFriendlySubtraction();
-        } else {
-          probDetail = generateBasicMix(ops);
-        }
-      } else if (rowNum === 17) {
-        // Mixed 3-Num Add/Sub
-        if (ops.add && ops.sub) {
-          probDetail = generateFriendlyMixed();
-        } else {
-          probDetail = generateBasicMix(ops);
-        }
-      } else if (rowNum === 18) {
-        // Row 18: Mixed operation row (e.g., a + b * c)
-        probDetail = generateMixedOperationRow18(c, ops);
-      } else if (rowNum === 19) {
-        // Row 19: Multiplication-Subtraction: a * b - c
-        if (ops.mul && ops.sub) {
-          const a = randomInt(3, 9);
-          const b = randomInt(3, 9);
-          const c = randomInt(4, a * b - 5);
-          probDetail = {
-            id: generateId(),
-            display: `${a} × ${b} - ${c} =`,
-            answer: (a * b - c).toString(),
-            type: OperationType.MIXED_OP
-          };
-        } else {
-          probDetail = generateBasicMix(ops);
-        }
-      } else if (rowNum === 20) {
-        // Row 20: Multiplication-Addition: a * b + c or a + b * c
-        if (ops.mul && ops.add) {
-          const usePattern2 = Math.random() > 0.5;
-          if (usePattern2) {
+      } else {
+        // Grade 2 logic
+        const rowNum = (r % 22) + 1; // 1 to 22
+        if (rowNum === 1 || rowNum === 3 || rowNum === 5) {
+          // Carry Addition
+          if (ops.add) {
+            probDetail = generateAdditionCarry();
+          } else if (ops.sub) {
+            probDetail = generateSubtractionBorrow();
+          } else {
+            probDetail = generateBasicMix(ops);
+          }
+        } else if (rowNum === 2 || rowNum === 4) {
+          // Borrow Subtraction
+          if (ops.sub) {
+            probDetail = generateSubtractionBorrow();
+          } else if (ops.add) {
+            probDetail = generateAdditionCarry();
+          } else {
+            probDetail = generateBasicMix(ops);
+          }
+        } else if (rowNum === 6 || rowNum === 7 || rowNum === 8) {
+          // Elementary Multiplication
+          if (ops.mul) {
+            probDetail = generateMultiplication();
+          } else {
+            probDetail = generateBasicMix(ops);
+          }
+        } else if (rowNum === 9 || rowNum === 10) {
+          // Exact Division
+          if (ops.div) {
+            probDetail = generateDivision();
+          } else {
+            probDetail = generateBasicMix(ops);
+          }
+        } else if (rowNum >= 11 && rowNum <= 14) {
+          // Division with Remainder
+          if (ops.div) {
+            probDetail = generateDivisionRemainder();
+          } else {
+            probDetail = generateBasicMix(ops);
+          }
+        } else if (rowNum === 15) {
+          // 3-Num Addition
+          if (ops.add) {
+            probDetail = generateFriendlyAddition();
+          } else {
+            probDetail = generateBasicMix(ops);
+          }
+        } else if (rowNum === 16) {
+          // 3-Num Subtraction
+          if (ops.sub) {
+            probDetail = generateFriendlySubtraction();
+          } else {
+            probDetail = generateBasicMix(ops);
+          }
+        } else if (rowNum === 17) {
+          // Mixed 3-Num Add/Sub
+          if (ops.add && ops.sub) {
+            probDetail = generateFriendlyMixed();
+          } else {
+            probDetail = generateBasicMix(ops);
+          }
+        } else if (rowNum === 18) {
+          // Row 18: Mixed operation row (e.g., a + b * c)
+          probDetail = generateMixedOperationRow18(c, ops);
+        } else if (rowNum === 19) {
+          // Row 19: Multiplication-Subtraction: a * b - c
+          if (ops.mul && ops.sub) {
+            const a = randomInt(3, 9);
             const b = randomInt(3, 9);
-            const c = randomInt(3, 9);
-            const a = randomInt(11, 45);
+            const c = randomInt(4, a * b - 5);
             probDetail = {
               id: generateId(),
-              display: `${a} + ${b} × ${c} =`,
-              answer: (a + b * c).toString(),
+              display: `${a} × ${b} - ${c} =`,
+              answer: (a * b - c).toString(),
               type: OperationType.MIXED_OP
             };
           } else {
-            const a = randomInt(3, 9);
+            probDetail = generateBasicMix(ops);
+          }
+        } else if (rowNum === 20) {
+          // Row 20: Multiplication-Addition: a * b + c or a + b * c
+          if (ops.mul && ops.add) {
+            const usePattern2 = Math.random() > 0.5;
+            if (usePattern2) {
+              const b = randomInt(3, 9);
+              const c = randomInt(3, 9);
+              const a = randomInt(11, 45);
+              probDetail = {
+                id: generateId(),
+                display: `${a} + ${b} × ${c} =`,
+                answer: (a + b * c).toString(),
+                type: OperationType.MIXED_OP
+              };
+            } else {
+              const a = randomInt(3, 9);
+              const b = randomInt(3, 9);
+              const c = randomInt(11, 45);
+              probDetail = {
+                id: generateId(),
+                display: `${a} × ${b} + ${c} =`,
+                answer: (a * b + c).toString(),
+                type: OperationType.MIXED_OP
+              };
+            }
+          } else {
+            probDetail = generateBasicMix(ops);
+          }
+        } else if (rowNum === 21) {
+          // Row 21: Division-Addition: a ÷ b + c
+          if (ops.div && ops.add) {
             const b = randomInt(3, 9);
-            const c = randomInt(11, 45);
+            const q = randomInt(3, 9);
+            const a = b * q;
+            const c = randomInt(11, 49);
             probDetail = {
               id: generateId(),
-              display: `${a} × ${b} + ${c} =`,
-              answer: (a * b + c).toString(),
+              display: `${a} ÷ ${b} + ${c} =`,
+              answer: (q + c).toString(),
               type: OperationType.MIXED_OP
             };
+          } else {
+            probDetail = generateBasicMix(ops);
           }
         } else {
-          probDetail = generateBasicMix(ops);
-        }
-      } else if (rowNum === 21) {
-        // Row 21: Division-Addition: a ÷ b + c
-        if (ops.div && ops.add) {
-          const b = randomInt(3, 9);
-          const q = randomInt(3, 9);
-          const a = b * q;
-          const c = randomInt(11, 49);
-          probDetail = {
-            id: generateId(),
-            display: `${a} ÷ ${b} + ${c} =`,
-            answer: (q + c).toString(),
-            type: OperationType.MIXED_OP
-          };
-        } else {
-          probDetail = generateBasicMix(ops);
-        }
-      } else {
-        // Row 22: Missing values in Division with Remainder (using box ▢ placeholder)
-        if (ops.div) {
-          probDetail = generateMissingValueRemainder(c);
-        } else {
-          probDetail = generateMissingAddSub(ops);
+          // Row 22: Missing values in Division with Remainder (using box ▢ placeholder)
+          if (ops.div) {
+            probDetail = generateMissingValueRemainder(c);
+          } else {
+            probDetail = generateMissingAddSub(ops);
+          }
         }
       }
 

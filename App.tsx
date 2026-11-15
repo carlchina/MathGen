@@ -2,20 +2,22 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, Printer, Download, Eye, EyeOff } from 'lucide-react';
 import Paper from './components/Paper';
 import { generateWorksheet, generateConceptExercises, AllowedOperations } from './utils/generator';
-import { MathProblem, WorksheetConfig, ConceptSection } from './types';
+import { MathProblem, WorksheetConfig, ConceptSection, GradeLevel } from './types';
 
 // Declare html2pdf for TypeScript since it's loaded via CDN
 declare var html2pdf: any;
 
 const App: React.FC = () => {
-  // Initialize config with dynamic date and default values matching image
+  // Initialize config with Grade 3 default matching the uploaded sheet
   const [config, setConfig] = useState<WorksheetConfig>(() => {
     return {
-      schoolName: '小学二年级下册口算练习',
-      gradeInfo: '11', // default class 11 from the image
+      schoolName: '三年级数学第一学期口算练习',
+      gradeLevel: 'grade3',
+      gradeInfo: '1',
       totalColumns: 5,
-      rowsPerColumn: 22, // update default to match the 22 rows in the image
+      rowsPerColumn: 25,
       showAnswers: false,
+      showMistakeCount: true,
     };
   });
 
@@ -23,30 +25,54 @@ const App: React.FC = () => {
     add: true,
     sub: true,
     mul: true,
-    div: true, // Turn division ON by default for 2nd Grade second term
+    div: true,
   });
 
   const [problems, setProblems] = useState<MathProblem[]>([]);
   const [conceptSection, setConceptSection] = useState<ConceptSection>(() => generateConceptExercises());
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const [showNeighbors, setShowNeighbors] = useState(true);
+  const [showNeighbors, setShowNeighbors] = useState(false);
 
   const handleGenerate = useCallback(() => {
     setIsGenerating(true);
     // Tiny timeout to allow UI to show loading state if calculation is heavy
     setTimeout(() => {
       const total = config.totalColumns * config.rowsPerColumn;
-      setProblems(generateWorksheet(total, operationOptions));
+      setProblems(generateWorksheet(total, operationOptions, config.gradeLevel, config.rowsPerColumn));
       setConceptSection(generateConceptExercises());
       setIsGenerating(false);
     }, 100);
-  }, [config.totalColumns, config.rowsPerColumn, operationOptions]);
+  }, [config.totalColumns, config.rowsPerColumn, config.gradeLevel, operationOptions]);
 
   // Initial generation
   useEffect(() => {
     handleGenerate();
   }, [handleGenerate]);
+
+  const handleGradeChange = (newGrade: GradeLevel) => {
+    if (newGrade === 'grade3') {
+      setConfig(prev => ({
+        ...prev,
+        gradeLevel: 'grade3',
+        schoolName: prev.schoolName.includes('二年级') ? '三年级数学第一学期口算练习' : prev.schoolName,
+        gradeInfo: prev.gradeInfo === '11' ? '1' : prev.gradeInfo,
+        rowsPerColumn: 25,
+        showMistakeCount: true,
+      }));
+      setShowNeighbors(false);
+    } else {
+      setConfig(prev => ({
+        ...prev,
+        gradeLevel: 'grade2',
+        schoolName: prev.schoolName.includes('三年级') ? '小学二年级下册口算练习' : prev.schoolName,
+        gradeInfo: prev.gradeInfo === '1' ? '11' : prev.gradeInfo,
+        rowsPerColumn: 22,
+        showMistakeCount: false,
+      }));
+      setShowNeighbors(true);
+    }
+  };
 
   const handlePrint = () => {
     window.print();
@@ -58,10 +84,11 @@ const App: React.FC = () => {
 
     setIsDownloading(true);
 
+    const gradeLabel = config.gradeLevel === 'grade3' ? '三年级' : '二年级';
     // Configuration for consistent A4 generation
     const opt = {
       margin: 0,
-      filename: `${config.schoolName.replace(/\s+/g, '_') || 'worksheet'}_二年级_第12周.pdf`,
+      filename: `${config.schoolName.replace(/\s+/g, '_') || 'worksheet'}_${gradeLabel}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
         scale: 2,
@@ -128,15 +155,46 @@ const App: React.FC = () => {
       {/* Control Bar - Hidden when printing */}
       <header className="bg-white border-b border-gray-300 px-4 md:px-6 py-4 flex flex-col lg:flex-row items-center justify-between sticky top-0 z-10 shadow-sm print:hidden gap-4">
 
-        {/* Title and Ops switches */}
+        {/* Title and Grade selector */}
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto text-center sm:text-left justify-between lg:justify-start">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <span className="text-2xl">📚</span>
             <div>
-              <h1 className="text-base font-extrabold text-gray-900 tracking-tight leading-none">
-                口算练习生成器
-              </h1>
-              <p className="text-[11px] text-gray-500 mt-1">二年级二期口算标准 (含余数除法/连减连加/混合/相邻数)</p>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base font-extrabold text-gray-900 tracking-tight leading-none">
+                  口算练习生成器
+                </h1>
+                {/* Grade Level Toggle Buttons */}
+                <div className="inline-flex bg-gray-100 p-0.5 rounded-lg border border-gray-300 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => handleGradeChange('grade2')}
+                    className={`px-2.5 py-0.5 rounded-md font-bold transition-all cursor-pointer ${
+                      config.gradeLevel === 'grade2'
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    二年级
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleGradeChange('grade3')}
+                    className={`px-2.5 py-0.5 rounded-md font-bold transition-all cursor-pointer ${
+                      config.gradeLevel === 'grade3'
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    三年级
+                  </button>
+                </div>
+              </div>
+              <p className="text-[11px] text-gray-500 mt-1">
+                {config.gradeLevel === 'grade3'
+                  ? '三年级上册口算标准 (两位数乘一位数 / 带余除法 / 四则混合运算)'
+                  : '二年级下册口算标准 (含余数除法 / 连减连加 / 混合 / 相邻数)'}
+              </p>
             </div>
           </div>
 
@@ -166,22 +224,40 @@ const App: React.FC = () => {
               );
             })}
             
-            {/* Neighbor option button */}
-            <button
-              onClick={() => setShowNeighbors(prev => !prev)}
-              className={`
-                flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all select-none cursor-pointer
-                ${showNeighbors
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                  : 'bg-gray-50 text-gray-500 border-gray-300 hover:bg-gray-150 hover:border-gray-400'
-                }
-              `}
-            >
-              <span className={`text-[13px] leading-none ${showNeighbors ? 'opacity-100' : 'opacity-70'}`}>
-                🔢
-              </span>
-              <span>相邻数</span>
-            </button>
+            {/* Conditional extra options based on Grade */}
+            {config.gradeLevel === 'grade3' ? (
+              <button
+                onClick={() => setConfig(prev => ({ ...prev, showMistakeCount: !prev.showMistakeCount }))}
+                className={`
+                  flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all select-none cursor-pointer
+                  ${config.showMistakeCount
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                    : 'bg-gray-50 text-gray-500 border-gray-300 hover:bg-gray-150 hover:border-gray-400'
+                  }
+                `}
+              >
+                <span className={`text-[13px] leading-none ${config.showMistakeCount ? 'opacity-100' : 'opacity-70'}`}>
+                  📝
+                </span>
+                <span>错题栏</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowNeighbors(prev => !prev)}
+                className={`
+                  flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all select-none cursor-pointer
+                  ${showNeighbors
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                    : 'bg-gray-50 text-gray-500 border-gray-300 hover:bg-gray-150 hover:border-gray-400'
+                  }
+                `}
+              >
+                <span className={`text-[13px] leading-none ${showNeighbors ? 'opacity-100' : 'opacity-70'}`}>
+                  🔢
+                </span>
+                <span>相邻数</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -201,7 +277,7 @@ const App: React.FC = () => {
               className="border border-gray-300 rounded px-2 py-1.5 text-sm w-24 focus:ring-2 focus:ring-blue-500 outline-none text-center font-bold"
               value={config.gradeInfo}
               onChange={(e) => setConfig({ ...config, gradeInfo: e.target.value })}
-              placeholder="班级 (e.g. 11)"
+              placeholder="班级 (e.g. 1)"
             />
           </div>
 

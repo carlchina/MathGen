@@ -9,6 +9,8 @@ export enum OperationType {
   MISSING_OPERAND = 'MISSING_OPERAND', // e.g., ▢ ÷ 7 = 5 ··· 6 or ( ) + 25 = 81
 }
 
+export type GradeLevel = 'grade2' | 'grade3';
+
 export interface MathProblem {
   id: string;
   display: string; // The text to show, e.g., "27 + 15 ="
@@ -31,8 +33,10 @@ export interface ConceptSection {
 
 export interface WorksheetConfig {
   schoolName: string;
+  gradeLevel: GradeLevel;
   gradeInfo: string;
   totalColumns: number;
   rowsPerColumn: number;
   showAnswers?: boolean; // Toggle to display answer sheet
+  showMistakeCount?: boolean; // Toggle to display "错 (   ) 题" at bottom of columns
 }

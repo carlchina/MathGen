@@ -22,25 +22,42 @@ body {
   }
 }
 
+@page {
+  size: A4 portrait;
+  margin: 10mm 12mm;
+}
+
 @media print {
-  body {
+  html, body {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: #ffffff !important;
     color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   
   #worksheet-paper {
     width: 100% !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    margin: 0 !important;
-    padding: 14mm 15mm !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
     box-shadow: none !important;
     min-height: 0 !important;
     height: auto !important;
     max-height: 100% !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    overflow: hidden !important;
+    overflow: visible !important;
+  }
+  
+  /* Prevent any page splits between header and grid (crucial for iOS Safari AirPrint) */
+  #worksheet-paper > div:first-child {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
   }
   
   /* Prevent any page splits within grid columns */
